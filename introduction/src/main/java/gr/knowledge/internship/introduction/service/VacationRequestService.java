@@ -44,9 +44,9 @@ public class VacationRequestService {
     }
     public VacationRequestDTO createVacationRequest(VacationRequestDTO vacationRequestDTO){
         //get the employee entity to retrieve the remaining holidays
-        Employee employee = employeeRepository.findById(vacationRequestDTO.getEmployeeDTO().getId())
+        Employee employee = employeeRepository.findById(vacationRequestDTO.getEmployee().getId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Employee with id: " + vacationRequestDTO.getEmployeeDTO().getId() + " not found from createVacationRequest!")
+                        "Employee with id: " + vacationRequestDTO.getEmployee().getId() + " not found from createVacationRequest!")
                 );
         //calculates the number of days between the dates the employee wants to take a leave
         int daysBetween = (int) ChronoUnit.DAYS.between(vacationRequestDTO.getStartDate(), vacationRequestDTO.getEndDate());
@@ -74,9 +74,9 @@ public class VacationRequestService {
                 //calculates the number of days between the dates the employee wants to take a leave
                 int daysToBeSubtracted = (int) ChronoUnit.DAYS.between(vacationRequestDTO.getStartDate(),
                         vacationRequestDTO.getEndDate()) - vacationRequestDTO.getDays() + 1;
-                int vacationDays = vacationRequestDTO.getEmployeeDTO().getVacationDays();
+                int vacationDays = vacationRequestDTO.getEmployee().getVacationDays();
                 //subtracts the days from the employee's remaining vacation days
-                vacationRequestDTO.getEmployeeDTO().setVacationDays(vacationDays - daysToBeSubtracted);
+                vacationRequestDTO.getEmployee().setVacationDays(vacationDays - daysToBeSubtracted);
                 vacationRequestDTO.setStatus(VacationStatusEnum.ACCEPTED);
             } else if (requestBody.getStatus() == VacationStatusEnum.REJECTED) {
                 vacationRequestDTO.setStatus(VacationStatusEnum.REJECTED);
