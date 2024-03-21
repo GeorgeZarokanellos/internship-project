@@ -1,5 +1,7 @@
 package gr.knowledge.internship.introduction.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import gr.knowledge.internship.introduction.entity.Employee;
 import gr.knowledge.internship.introduction.enums.VacationStatusEnum;
 import lombok.*;
 
