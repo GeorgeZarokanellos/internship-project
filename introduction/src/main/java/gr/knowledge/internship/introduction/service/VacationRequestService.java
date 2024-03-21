@@ -43,13 +43,17 @@ public class VacationRequestService {
         return modelMapper.map(vacationRequest, new TypeToken<VacationRequestDTO>(){}.getType());
     }
     public VacationRequestDTO createVacationRequest(VacationRequestDTO vacationRequestDTO){
+
         //get the employee entity to retrieve the remaining holidays
         Employee employee = employeeRepository.findById(vacationRequestDTO.getEmployee().getId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Employee with id: " + vacationRequestDTO.getEmployee().getId() + " not found from createVacationRequest!")
                 );
+
         //calculates the number of days between the dates the employee wants to take a leave
         int daysBetween = (int) ChronoUnit.DAYS.between(vacationRequestDTO.getStartDate(), vacationRequestDTO.getEndDate());
+
+        //check if the remaining vacation days of the employee are enough
         if( daysBetween - vacationRequestDTO.getDays() <= employee.getVacationDays()) {
             vacationRequestDTO.setStatus(VacationStatusEnum.PENDING);
         } else {
@@ -61,26 +65,32 @@ public class VacationRequestService {
     }
 
     public VacationRequestDTO updateVacationRequest(VacationRequestDTO requestBody, int vacationId){
+
         VacationRequestDTO vacationRequestDTO = modelMapper.map(vacationRequestRepository.findById(vacationId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Vacation request with id: " + vacationId + " not found from updateStatusAndVacationDays!")
                 ), new TypeToken<VacationRequestDTO>(){}.getType());
-        if(requestBody.getStatus() == vacationRequestDTO.getStatus()){
+
+        if(requestBody.getStatus() == vacationRequestDTO.getStatus()){  //if the status is the same, then do normal update operation
             requestBody.setId(vacationId);
             vacationRequestRepository.save(modelMapper.map(requestBody, VacationRequest.class));
             return requestBody;
         } else {
             if(requestBody.getStatus() == VacationStatusEnum.ACCEPTED){
+
                 //calculates the number of days between the dates the employee wants to take a leave
                 int daysToBeSubtracted = (int) ChronoUnit.DAYS.between(vacationRequestDTO.getStartDate(),
                         vacationRequestDTO.getEndDate()) - vacationRequestDTO.getDays() + 1;
+
+                //get remaining vacation days of the employee
                 int vacationDays = vacationRequestDTO.getEmployee().getVacationDays();
-                //subtracts the days from the employee's remaining vacation days
+
+                //subtracts the days from the employee's remaining vacation days and change status
                 vacationRequestDTO.getEmployee().setVacationDays(vacationDays - daysToBeSubtracted);
                 vacationRequestDTO.setStatus(VacationStatusEnum.ACCEPTED);
-            } else if (requestBody.getStatus() == VacationStatusEnum.REJECTED) {
-                vacationRequestDTO.setStatus(VacationStatusEnum.REJECTED);
-            }
+
+            } else if (requestBody.getStatus() == VacationStatusEnum.REJECTED)  vacationRequestDTO.setStatus(VacationStatusEnum.REJECTED);
+
             vacationRequestRepository.save(modelMapper.map(vacationRequestDTO, VacationRequest.class));
             return vacationRequestDTO;
         }

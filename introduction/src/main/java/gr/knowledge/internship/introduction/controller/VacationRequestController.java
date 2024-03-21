@@ -1,9 +1,7 @@
 package gr.knowledge.internship.introduction.controller;
 
 import gr.knowledge.internship.introduction.dto.VacationRequestDTO;
-import gr.knowledge.internship.introduction.parameter.VacationRequestParameter;
 import gr.knowledge.internship.introduction.service.VacationRequestService;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
