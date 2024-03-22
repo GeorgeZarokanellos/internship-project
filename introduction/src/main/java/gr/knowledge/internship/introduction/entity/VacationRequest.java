@@ -3,10 +3,7 @@ package gr.knowledge.internship.introduction.entity;
 import gr.knowledge.internship.introduction.enums.VacationStatusEnum;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.springframework.core.SpringVersion;
-
 import java.time.LocalDate;
 
 @Entity
@@ -32,7 +29,7 @@ public class VacationRequest {
     @NotNull
     private LocalDate endDate;
 
-    @NotNull
+    @NotNull @Enumerated(EnumType.STRING)
     private VacationStatusEnum status;
 
     @NotNull
