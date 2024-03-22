@@ -42,10 +42,15 @@ public class BonusService {
 
     public BonusDTO createBonus(BonusDTO bonusDTO){
         Bonus bonus = new Bonus();
+        //get the employee entity to retrieve the salary
         Employee employee = employeeRepository.getReferenceById(bonusDTO.getEmployeeId());
+        //calculate the bonus amount
         double amountAfterBonus = calcBonus(employee.getSalary(), "autumn");
+        //set the bonus amount to the DTO
         bonusDTO.setAmount(amountAfterBonus);
+        //map the DTO to the entity
         modelMapper.map(bonusDTO, bonus);
+
         bonusRepository.save(bonus);
         return bonusDTO;
     }
@@ -63,7 +68,9 @@ public class BonusService {
 
     public double calcBonus(double salary, String season){
         double rate = 0;
+        //get the bonus rate for the specific season
         for (BonusRateEnum entry: BonusRateEnum.values()) {
+            //if the season is the same as the one in the enum
             if(entry.getSeason().equals(season))
                 rate = entry.getRate();
         }

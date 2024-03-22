@@ -67,6 +67,8 @@ public class VacationRequestService {
     }
 
     public VacationRequestDTO updateVacationRequest(VacationRequestDTO requestBody, int vacationId){
+        //create a map to handle the different status cases
+        //TODO: create one map instead of creating a new one every time
         Map<VacationStatusEnum, Function<VacationRequestDTO,VacationRequestDTO>> statusMap = new HashMap<>();
         statusMap.put(VacationStatusEnum.ACCEPTED, this::acceptVR);
         statusMap.put(VacationStatusEnum.REJECTED, this::rejectVR);
