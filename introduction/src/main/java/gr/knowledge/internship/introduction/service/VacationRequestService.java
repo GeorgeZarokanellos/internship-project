@@ -45,6 +45,9 @@ public class VacationRequestService {
         return modelMapper.map(vacationRequest, new TypeToken<VacationRequestDTO>(){}.getType());
     }
     public VacationRequestDTO createVacationRequest(VacationRequestDTO vacationRequestDTO){
+        //check if enum is valid
+        if(!VacationStatusEnum.resolveEnum(vacationRequestDTO.getStatus().toString()))
+            throw new IllegalArgumentException("Invalid status: " + vacationRequestDTO.getStatus().toString() + " from updateVacationRequest!");
 
         //get the employee entity to retrieve the remaining holidays
         Employee employee = employeeRepository.findById(vacationRequestDTO.getEmployee().getId())
@@ -67,6 +70,10 @@ public class VacationRequestService {
     }
 
     public VacationRequestDTO updateVacationRequest(VacationRequestDTO requestBody, int vacationId){
+
+        if(!VacationStatusEnum.resolveEnum(requestBody.getStatus().toString()))
+            throw new IllegalArgumentException("Invalid status: " + requestBody.getStatus().toString() + " from updateVacationRequest!");
+
         //create a map to handle the different status cases
         //TODO: create one map instead of creating a new one every time
         Map<VacationStatusEnum, Function<VacationRequestDTO,VacationRequestDTO>> statusMap = new HashMap<>();

@@ -17,4 +17,13 @@ public enum BonusRateEnum {
         this.season = season;
         this.rate = rate;
     }
+
+     public static boolean resolveEnum(String season){
+        for(BonusRateEnum bonusRateEnum : BonusRateEnum.values()){
+            if(bonusRateEnum.getSeason().equals(season)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

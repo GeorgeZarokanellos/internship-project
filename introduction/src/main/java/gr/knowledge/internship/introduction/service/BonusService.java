@@ -41,6 +41,7 @@ public class BonusService {
     }
 
     public BonusDTO createBonus(BonusDTO bonusDTO){
+
         Bonus bonus = new Bonus();
         //get the employee entity to retrieve the salary
         Employee employee = employeeRepository.getReferenceById(bonusDTO.getEmployeeId());
@@ -67,6 +68,9 @@ public class BonusService {
     }
 
     public double calcBonus(double salary, String season){
+        if(!BonusRateEnum.resolveEnum(season))
+            throw new IllegalArgumentException("Invalid season: " + season + " from calcBonus!");
+
         double rate = 0;
         //get the bonus rate for the specific season
         for (BonusRateEnum entry: BonusRateEnum.values()) {
