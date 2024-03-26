@@ -45,7 +45,7 @@ public class CompanyController {
         return companyService.createCompany(companyDTO);
     }
 
-    @PostMapping("/create-employee-bonus")
+    @PostMapping("/employee-bonus-creation")
     public List<BonusDTO> createBonusForEmployees(@ModelAttribute EmployeeBonusParameter eBP){
         return companyService.addBonusToEachEmployee(eBP.getCompanyId(), eBP.getSeason());
     }
