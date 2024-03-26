@@ -16,7 +16,7 @@ public class ProductController {
     @Autowired
     public ProductController(ProductService productService){ this.productService = productService; }
 
-    @GetMapping("/")
+    @GetMapping
     public List<ProductDTO> getProducts(){
         return productService.getProducts();
     }
@@ -26,7 +26,7 @@ public class ProductController {
         return productService.getProductById(id);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ProductDTO createProduct(@RequestBody ProductDTO requestBody){
         return productService.createProduct(requestBody);
     }

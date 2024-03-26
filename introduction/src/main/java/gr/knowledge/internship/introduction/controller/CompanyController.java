@@ -22,7 +22,7 @@ public class CompanyController {
         this.companyService = companyService;
     }
 
-    @GetMapping("/")
+    @GetMapping
     public List<CompanyDTO> getCompanies(){
         return companyService.getCompanies();
     }
@@ -40,7 +40,7 @@ public class CompanyController {
         return companyService.getCompanyProducts(companyId);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public CompanyDTO createCompany(@RequestBody CompanyDTO companyDTO){
         return companyService.createCompany(companyDTO);
     }

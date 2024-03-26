@@ -17,7 +17,7 @@ public class EmployeeProductController {
     public EmployeeProductController(EmployeeProductService employeeProductService){ 
         this.employeeProductService = employeeProductService; }
 
-    @GetMapping("/")
+    @GetMapping
     public List<EmployeeProductDTO> getEmployeeProducts(){
         return employeeProductService.getEmployeeProducts();
     }
@@ -27,7 +27,7 @@ public class EmployeeProductController {
         return employeeProductService.getEmployeeProductById(id);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public EmployeeProductDTO createEmployee(@RequestBody EmployeeProductDTO requestBody){
         return employeeProductService.createEmployeeProduct(requestBody);
     }

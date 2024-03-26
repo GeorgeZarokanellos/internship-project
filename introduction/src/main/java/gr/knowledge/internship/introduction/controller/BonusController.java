@@ -16,13 +16,13 @@ public class BonusController {
         this.bonusService = bonusService;
     }
 
-    @GetMapping("/")
+    @GetMapping
     public List<BonusDTO> getBonuses(){ return bonusService.getBonuses(); }
 
     @GetMapping("/{id}")
     public BonusDTO getBonusById(@PathVariable int id) { return bonusService.getBonusById(id); }
 
-    @PostMapping("/")
+    @PostMapping
     public BonusDTO createBonus(@RequestBody BonusDTO bonusDTO) { return bonusService.createBonus(bonusDTO); }
 
     @PutMapping("/{id}")
