@@ -8,7 +8,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/bonuses")
-@CrossOrigin
 public class BonusController {
     private final BonusService bonusService;
 
