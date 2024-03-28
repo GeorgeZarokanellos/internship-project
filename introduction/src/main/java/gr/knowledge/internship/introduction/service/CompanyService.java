@@ -1,9 +1,6 @@
 package gr.knowledge.internship.introduction.service;
 
-import gr.knowledge.internship.introduction.dto.BonusDTO;
-import gr.knowledge.internship.introduction.dto.CompanyDTO;
-import gr.knowledge.internship.introduction.dto.EmployeeProductDTO;
-import gr.knowledge.internship.introduction.dto.ProductDTO;
+import gr.knowledge.internship.introduction.dto.*;
 import gr.knowledge.internship.introduction.entity.*;
 import gr.knowledge.internship.introduction.repository.BonusRepository;
 import gr.knowledge.internship.introduction.repository.CompanyRepository;
@@ -11,18 +8,18 @@ import gr.knowledge.internship.introduction.repository.EmployeeProductRepository
 import gr.knowledge.internship.introduction.repository.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Log4j2
 public class CompanyService {
     private final CompanyRepository companyRepository;
     private final EmployeeRepository employeeRepository;
@@ -105,12 +102,33 @@ public class CompanyService {
 
     public Map<String, List<ProductDTO>> getCompanyProducts(int companyId){
         //retrieve all the employee-product entities
+        Map<String, List<ProductDTO>> employeeProductMap = new HashMap<>();
+        String mapKey;
         List<EmployeeProductDTO> employeeProductList = modelMapper.map(employeeProductRepository.findAll(), new TypeToken<List<EmployeeProductDTO>>(){}.getType());
+        List<EmployeeProductDTO> companySpecificProducts = new ArrayList<>();
+        List<ProductDTO> employeeSpecificProducts = new ArrayList<>();
+        Set<EmployeeDTO> employees = new HashSet<>();
+        for(EmployeeProductDTO epDTO: employeeProductList){
+            if(epDTO.getEmployee().getCompany().getId() == companyId) {
+                companySpecificProducts.add(epDTO);
+                employees.add(epDTO.getEmployee());
+            }
+        }
+        for(EmployeeDTO employee: employees){
+            for(EmployeeProductDTO epDTO: companySpecificProducts){
+                if(epDTO.getEmployee().getId() == employee.getId()){
+                    employeeSpecificProducts.add(epDTO.getProduct());
+                }
+            }
+            employeeProductMap.put(employee.getName().concat(employee.getSurname()), employeeSpecificProducts);
+            employeeSpecificProducts.clear();
+        }
+        return employeeProductMap;
         //filter the list to get the employee-product entities of the specific company
-        return employeeProductList.stream().filter(ep -> ep.getEmployee().getCompany().getId() == companyId)
-                //group the products by the concatenated name and surname of the employee
-                .collect(Collectors.groupingBy(ep -> ep.getEmployee().getName().concat(ep.getEmployee().getSurname()),
-                        //map the products to a list where the key is the name and surname of the employee and the value is the list of products
-                        Collectors.mapping(EmployeeProductDTO::getProduct, Collectors.toList())));
+//        return employeeProductList.stream().filter(ep -> ep.getEmployee().getCompany().getId() == companyId)
+//                //group the products by the concatenated name and surname of the employee
+//                .collect(Collectors.groupingBy(ep -> ep.getEmployee().getName().concat(ep.getEmployee().getSurname()),
+//                        //map the products to a list where the key is the name and surname of the employee and the value is the list of products
+//                        Collectors.mapping(EmployeeProductDTO::getProduct, Collectors.toList())));
     }
 }
