@@ -109,7 +109,7 @@ public class VacationRequestService {
         return true;
     }
 
-    public VacationRequestDTO acceptVR(VacationRequestDTO vacationRequestDTO) {
+    private VacationRequestDTO acceptVR(VacationRequestDTO vacationRequestDTO) {
         //calculates the number of days between the dates the employee wants to take a leave
         int daysToBeSubtracted = (int) ChronoUnit.DAYS.between(vacationRequestDTO.getStartDate(),
                 vacationRequestDTO.getEndDate()) - vacationRequestDTO.getDays() + 1;
@@ -124,7 +124,7 @@ public class VacationRequestService {
         return vacationRequestDTO;
     }
 
-    public VacationRequestDTO rejectVR(VacationRequestDTO vacationRequestDTO) {
+    private VacationRequestDTO rejectVR(VacationRequestDTO vacationRequestDTO) {
         vacationRequestDTO.setStatus(VacationStatusEnum.REJECTED);
         return vacationRequestDTO;
     }
