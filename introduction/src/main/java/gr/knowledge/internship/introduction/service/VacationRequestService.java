@@ -8,11 +8,15 @@ import gr.knowledge.internship.introduction.repository.EmployeeRepository;
 import gr.knowledge.internship.introduction.repository.VacationRequestRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +25,7 @@ import java.util.function.Function;
 
 @Service
 @Transactional
+@Log4j2
 public class VacationRequestService {
 
     private final VacationRequestRepository vacationRequestRepository;
@@ -45,27 +50,29 @@ public class VacationRequestService {
         return modelMapper.map(vacationRequest, new TypeToken<VacationRequestDTO>(){}.getType());
     }
     public VacationRequestDTO createVacationRequest(VacationRequestDTO vacationRequestDTO){
-        //check if enum is valid
-        if(!VacationStatusEnum.resolveEnum(vacationRequestDTO.getStatus().toString()))
-            throw new IllegalArgumentException("Invalid status: " + vacationRequestDTO.getStatus().toString() + " from updateVacationRequest!");
+        log.info("Creating vacation request for employee with id: " + vacationRequestDTO.getEmployee().getId());
 
         //get the employee entity to retrieve the remaining holidays
         Employee employee = employeeRepository.findById(vacationRequestDTO.getEmployee().getId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Employee with id: " + vacationRequestDTO.getEmployee().getId() + " not found from createVacationRequest!")
-                );
+                .orElseThrow(() -> {
+                        log.error("Employee with id: " + vacationRequestDTO.getEmployee().getId() + " not found from createVacationRequest!");
+                        return new EntityNotFoundException("Employee with id: " + vacationRequestDTO.getEmployee().getId() + " not found from createVacationRequest!");
+                });
 
         //calculates the number of days between the dates the employee wants to take a leave
         int daysBetween = (int) ChronoUnit.DAYS.between(vacationRequestDTO.getStartDate(), vacationRequestDTO.getEndDate());
+        log.info("Days between the dates: " + daysBetween);
 
         //check if the remaining vacation days of the employee are enough
         if( daysBetween - vacationRequestDTO.getDays() <= employee.getVacationDays()) {
+            log.info("Enough vacation days for employee with id: " + vacationRequestDTO.getEmployee().getId());
             vacationRequestDTO.setStatus(VacationStatusEnum.PENDING);
         } else {
-            System.out.println("Remaining vacation days not enough!");
+            log.info("Not enough vacation days for employee with id: " + vacationRequestDTO.getEmployee().getId());
             vacationRequestDTO.setStatus(VacationStatusEnum.REJECTED);
         }
         vacationRequestRepository.save(modelMapper.map(vacationRequestDTO, VacationRequest.class));
+        log.info("Vacation request created successfully!");
         return vacationRequestDTO;
     }
 
