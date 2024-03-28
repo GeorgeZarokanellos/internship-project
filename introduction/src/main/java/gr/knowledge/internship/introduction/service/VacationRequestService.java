@@ -27,12 +27,18 @@ public class VacationRequestService {
     private final VacationRequestRepository vacationRequestRepository;
     private final EmployeeRepository employeeRepository;
     private final ModelMapper modelMapper;
+    private final Map<VacationStatusEnum, Function<VacationRequestDTO,VacationRequestDTO>> statusMap;
 
     @Autowired
-    public VacationRequestService(VacationRequestRepository vacationRequestRepository, EmployeeRepository employeeRepository, ModelMapper modelMapper){
+    public VacationRequestService(VacationRequestRepository vacationRequestRepository,
+                                  EmployeeRepository employeeRepository,
+                                  ModelMapper modelMapper){
         this.vacationRequestRepository = vacationRequestRepository;
         this.employeeRepository = employeeRepository;
         this.modelMapper = modelMapper;
+        this.statusMap = new HashMap<>();
+        //initialize the map with the functions that correspond to each status
+        insertAcceptRejectVacationRequest();
     }
 
     public List<VacationRequestDTO> getVacationRequests(){
@@ -59,29 +65,13 @@ public class VacationRequestService {
         int daysBetween = (int) ChronoUnit.DAYS.between(vacationRequestDTO.getStartDate(), vacationRequestDTO.getEndDate());
         log.info("Days between the dates: " + daysBetween);
 
-        //check if the remaining vacation days of the employee are enough
-        if( daysBetween - vacationRequestDTO.getDays() <= employee.getVacationDays()) {
-            log.info("Enough vacation days for employee with id: " + vacationRequestDTO.getEmployee().getId());
-            vacationRequestDTO.setStatus(VacationStatusEnum.PENDING);
-        } else {
-            log.info("Not enough vacation days for employee with id: " + vacationRequestDTO.getEmployee().getId());
-            vacationRequestDTO.setStatus(VacationStatusEnum.REJECTED);
-        }
-        vacationRequestRepository.save(modelMapper.map(vacationRequestDTO, VacationRequest.class));
-        log.info("Vacation request created successfully!");
-        return vacationRequestDTO;
+        return checkRemainingDaysAndSetStatus(vacationRequestDTO, daysBetween, employee);
     }
 
     public VacationRequestDTO updateVacationRequest(VacationRequestDTO requestBody, int vacationId){
 
         if(!VacationStatusEnum.resolveEnum(requestBody.getStatus().toString()))
             throw new IllegalArgumentException("Invalid status: " + requestBody.getStatus().toString() + " from updateVacationRequest!");
-
-        //create a map to handle the different status cases
-        //TODO: create one map instead of creating a new one every time
-        Map<VacationStatusEnum, Function<VacationRequestDTO,VacationRequestDTO>> statusMap = new HashMap<>();
-        statusMap.put(VacationStatusEnum.ACCEPTED, this::acceptVR);
-        statusMap.put(VacationStatusEnum.REJECTED, this::rejectVR);
 
         VacationRequestDTO vacationRequestDTO = modelMapper.map(vacationRequestRepository.findById(vacationId)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -105,6 +95,25 @@ public class VacationRequestService {
         return true;
     }
 
+    //TODO: check again if the days are being subtracted correctly
+    private VacationRequestDTO checkRemainingDaysAndSetStatus(VacationRequestDTO vacationRequestDTO, int daysBetween, Employee employee){
+        //check if the remaining vacation days of the employee are enough
+        if( daysBetween - vacationRequestDTO.getDays() <= employee.getVacationDays()) {
+            log.info("Enough vacation days for employee with id: " + vacationRequestDTO.getEmployee().getId());
+            vacationRequestDTO.setStatus(VacationStatusEnum.PENDING);
+        } else {
+            log.info("Not enough vacation days for employee with id: " + vacationRequestDTO.getEmployee().getId());
+            vacationRequestDTO.setStatus(VacationStatusEnum.REJECTED);
+        }
+        vacationRequestRepository.save(modelMapper.map(vacationRequestDTO, VacationRequest.class));
+        log.info("Vacation request created successfully!");
+        return vacationRequestDTO;
+    }
+
+    private void insertAcceptRejectVacationRequest(){
+        statusMap.put(VacationStatusEnum.ACCEPTED, this::acceptVR);
+        statusMap.put(VacationStatusEnum.REJECTED, this::rejectVR);
+    }
     private VacationRequestDTO acceptVR(VacationRequestDTO vacationRequestDTO) {
         //calculates the number of days between the dates the employee wants to take a leave
         int daysToBeSubtracted = (int) ChronoUnit.DAYS.between(vacationRequestDTO.getStartDate(),
