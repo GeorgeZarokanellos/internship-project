@@ -13,7 +13,8 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.temporal.ChronoUnit;
+
+import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,7 @@ public class VacationRequestService {
                 });
 
         //calculates the number of days between the dates the employee wants to take a leave
-        int daysBetween = (int) ChronoUnit.DAYS.between(vacationRequestDTO.getStartDate(), vacationRequestDTO.getEndDate());
+        int daysBetween =  Period.between(vacationRequestDTO.getStartDate(), vacationRequestDTO.getEndDate()).getDays();
         log.info("Days between the dates: " + daysBetween);
 
         return checkRemainingDaysAndSetStatus(vacationRequestDTO, daysBetween, employee);
@@ -85,7 +86,7 @@ public class VacationRequestService {
         } else {
             //if the status is different, then apply the function that corresponds to the status
             vacationRequestDTO = statusMap.get(requestBody.getStatus()).apply(vacationRequestDTO);
-
+            log.info("Vacation days in update method: " + vacationRequestDTO.getEmployee().getVacationDays());
             vacationRequestRepository.save(modelMapper.map(vacationRequestDTO, VacationRequest.class));
             return vacationRequestDTO;
         }
@@ -116,8 +117,7 @@ public class VacationRequestService {
     }
     private VacationRequestDTO acceptVR(VacationRequestDTO vacationRequestDTO) {
         //calculates the number of days between the dates the employee wants to take a leave
-        int daysToBeSubtracted = (int) ChronoUnit.DAYS.between(vacationRequestDTO.getStartDate(),
-                vacationRequestDTO.getEndDate()) - vacationRequestDTO.getDays() + 1;
+        int daysToBeSubtracted = Period.between(vacationRequestDTO.getStartDate(), vacationRequestDTO.getEndDate()).getDays() - vacationRequestDTO.getDays();
 
         //get remaining vacation days of the employee
         int vacationDays = vacationRequestDTO.getEmployee().getVacationDays();
@@ -125,7 +125,7 @@ public class VacationRequestService {
         //subtracts the days from the employee's remaining vacation days and change status
         vacationRequestDTO.getEmployee().setVacationDays(vacationDays - daysToBeSubtracted);
         vacationRequestDTO.setStatus(VacationStatusEnum.ACCEPTED);
-
+        employeeRepository.save(modelMapper.map(vacationRequestDTO.getEmployee(), Employee.class));
         return vacationRequestDTO;
     }
 
