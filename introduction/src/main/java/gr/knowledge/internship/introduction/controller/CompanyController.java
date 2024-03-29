@@ -2,6 +2,7 @@ package gr.knowledge.internship.introduction.controller;
 
 import gr.knowledge.internship.introduction.dto.BonusDTO;
 import gr.knowledge.internship.introduction.dto.CompanyDTO;
+import gr.knowledge.internship.introduction.dto.EmployeeMapDTO;
 import gr.knowledge.internship.introduction.dto.ProductDTO;
 import gr.knowledge.internship.introduction.parameter.EmployeeBonusParameter;
 import gr.knowledge.internship.introduction.service.CompanyService;
@@ -35,7 +36,7 @@ public class CompanyController {
     }
 
     @GetMapping("/{companyId}/products")
-    public Map<String, List<ProductDTO>> getCompanyProducts(@PathVariable int companyId){
+    public Map<EmployeeMapDTO, List<ProductDTO>> getCompanyProducts(@PathVariable int companyId){
         return companyService.getCompanyProducts(companyId);
     }
 
