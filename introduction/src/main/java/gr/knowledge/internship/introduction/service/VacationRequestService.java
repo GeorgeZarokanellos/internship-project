@@ -28,7 +28,6 @@ public class VacationRequestService {
     private final VacationRequestRepository vacationRequestRepository;
     private final EmployeeRepository employeeRepository;
     private final ModelMapper modelMapper;
-    private final Map<VacationStatusEnum, Function<VacationRequestDTO,VacationRequestDTO>> statusMap;
 
     @Autowired
     public VacationRequestService(VacationRequestRepository vacationRequestRepository,
@@ -37,9 +36,6 @@ public class VacationRequestService {
         this.vacationRequestRepository = vacationRequestRepository;
         this.employeeRepository = employeeRepository;
         this.modelMapper = modelMapper;
-        this.statusMap = new HashMap<>();
-        //initialize the map with the functions that correspond to each status
-        insertAcceptRejectVacationRequest();
     }
 
     @Transactional(readOnly = true)
@@ -72,7 +68,8 @@ public class VacationRequestService {
     }
 
     public VacationRequestDTO updateVacationRequest(VacationRequestDTO requestBody, int vacationId){
-
+        Map<VacationStatusEnum, Function<VacationRequestDTO, VacationRequestDTO>> statusMap = new HashMap<>();
+        insertAcceptRejectVacationRequest(statusMap);
         if(!VacationStatusEnum.resolveEnum(requestBody.getStatus().toString()))
             throw new IllegalArgumentException("Invalid status: " + requestBody.getStatus().toString() + " from updateVacationRequest!");
 
@@ -98,7 +95,6 @@ public class VacationRequestService {
         return true;
     }
 
-    //TODO: check again if the days are being subtracted correctly
     private VacationRequestDTO checkRemainingDaysAndSetStatus(VacationRequestDTO vacationRequestDTO, int daysBetween, Employee employee){
         //check if the remaining vacation days of the employee are enough
         if( daysBetween - vacationRequestDTO.getDays() <= employee.getVacationDays()) {
@@ -113,7 +109,7 @@ public class VacationRequestService {
         return vacationRequestDTO;
     }
 
-    private void insertAcceptRejectVacationRequest(){
+    private void insertAcceptRejectVacationRequest(Map<VacationStatusEnum, Function<VacationRequestDTO, VacationRequestDTO>> statusMap){
         statusMap.put(VacationStatusEnum.ACCEPTED, this::acceptVR);
         statusMap.put(VacationStatusEnum.REJECTED, this::rejectVR);
     }
