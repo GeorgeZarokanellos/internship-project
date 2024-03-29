@@ -3,11 +3,11 @@ package gr.knowledge.internship.introduction.service;
 import gr.knowledge.internship.introduction.dto.ProductDTO;
 import gr.knowledge.internship.introduction.entity.Product;
 import gr.knowledge.internship.introduction.repository.ProductRepository;
-import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,11 +24,13 @@ public class ProductService {
         this.modelMapper = modelMapper;
     }
 
+    @Transactional(readOnly = true)
     public List<ProductDTO> getProducts(){
         List<Product> productList = productRepository.findAll();
         return modelMapper.map(productList, new TypeToken<List<ProductDTO>>(){}.getType());
     }
 
+    @Transactional(readOnly = true)
     public ProductDTO getProductById(int id) {
         Product product = productRepository.getReferenceById(id);
         return modelMapper.map(product, new TypeToken<ProductDTO>(){}.getType());

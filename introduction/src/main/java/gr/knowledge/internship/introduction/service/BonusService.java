@@ -7,12 +7,12 @@ import gr.knowledge.internship.introduction.entity.Employee;
 import gr.knowledge.internship.introduction.repository.BonusRepository;
 import gr.knowledge.internship.introduction.repository.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,11 +31,13 @@ public class BonusService {
         this.employeeRepository = employeeRepository;
         this.modelMapper = modelMapper;
     }
+    @Transactional(readOnly = true)
     public List<BonusDTO> getBonuses(){
         List<Bonus> bonusList = bonusRepository.findAll();
         return modelMapper.map(bonusList, new TypeToken<List<BonusDTO>>(){}.getType());
     }
 
+    @Transactional(readOnly = true)
     public BonusDTO getBonusById(int id){
         Bonus bonus = bonusRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Bonus with id: " + id + " not found"));

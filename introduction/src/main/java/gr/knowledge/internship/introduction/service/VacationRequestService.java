@@ -7,12 +7,12 @@ import gr.knowledge.internship.introduction.entity.VacationRequest;
 import gr.knowledge.internship.introduction.repository.EmployeeRepository;
 import gr.knowledge.internship.introduction.repository.VacationRequestRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Period;
 import java.util.HashMap;
@@ -42,11 +42,13 @@ public class VacationRequestService {
         insertAcceptRejectVacationRequest();
     }
 
+    @Transactional(readOnly = true)
     public List<VacationRequestDTO> getVacationRequests(){
         List<VacationRequest> vacationRequestList = vacationRequestRepository.findAll();
         return modelMapper.map(vacationRequestList, new TypeToken<List<VacationRequestDTO>>(){}.getType());
     }
 
+    @Transactional(readOnly = true)
     public VacationRequestDTO getVacationRequestById(int id) {
         VacationRequest vacationRequest = vacationRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Vacation request with id: " + id + " not found"));

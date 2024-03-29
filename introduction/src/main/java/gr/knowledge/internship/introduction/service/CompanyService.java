@@ -7,12 +7,12 @@ import gr.knowledge.internship.introduction.repository.CompanyRepository;
 import gr.knowledge.internship.introduction.repository.EmployeeProductRepository;
 import gr.knowledge.internship.introduction.repository.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -46,16 +46,19 @@ public class CompanyService {
         this.modelMapper = modelMapper;
     }
 
+    @Transactional(readOnly = true)
     public List<CompanyDTO> getCompanies(){
         List<Company> companyList = companyRepository.findAll();
         return modelMapper.map(companyList, new TypeToken<List<CompanyDTO>>(){}.getType());
     }
 
+    @Transactional(readOnly = true)
     public CompanyDTO getCompanyById(int companyId) {
         Company company = companyRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException("Company with id: " + companyId + " not found!"));
         return modelMapper.map(company, new TypeToken<CompanyDTO>(){}.getType());
     }
 
+    @Transactional(readOnly = true)
     public Map<EmployeeMapDTO, List<ProductDTO>> getCompanyProducts(int companyId){
         //retrieve all the employee-product entities
         Map<EmployeeMapDTO, List<ProductDTO>> employeeProductMap = new HashMap<>();

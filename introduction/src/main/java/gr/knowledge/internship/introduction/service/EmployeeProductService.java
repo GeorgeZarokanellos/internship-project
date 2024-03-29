@@ -1,14 +1,13 @@
 package gr.knowledge.internship.introduction.service;
 
-
 import gr.knowledge.internship.introduction.dto.EmployeeProductDTO;
 import gr.knowledge.internship.introduction.entity.EmployeeProduct;
 import gr.knowledge.internship.introduction.repository.EmployeeProductRepository;
-import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,11 +23,13 @@ public class EmployeeProductService {
         this.modelMapper = modelMapper;
     }
 
+    @Transactional(readOnly = true)
     public List<EmployeeProductDTO> getEmployeeProducts(){
         List<EmployeeProduct> employeeProductList = employeeProductRepository.findAll();
         return modelMapper.map(employeeProductList, new TypeToken<List<EmployeeProductDTO>>(){}.getType());
     }
 
+    @Transactional(readOnly = true)
     public EmployeeProductDTO getEmployeeProductById(int id){
         EmployeeProduct employeeProduct = employeeProductRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee product with id: " + id + " not found"));

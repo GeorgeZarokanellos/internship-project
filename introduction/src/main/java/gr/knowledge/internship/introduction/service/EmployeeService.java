@@ -4,11 +4,11 @@ import gr.knowledge.internship.introduction.dto.EmployeeDTO;
 import gr.knowledge.internship.introduction.entity.Employee;
 import gr.knowledge.internship.introduction.repository.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,11 +25,13 @@ public class EmployeeService {
         this.modelMapper = modelMapper;
     }
 
+    @Transactional(readOnly = true)
     public List<EmployeeDTO> getEmployees(){
         List<Employee> employeeList = employeeRepository.findAll();
         return modelMapper.map(employeeList, new TypeToken<List<EmployeeDTO>>(){}.getType());
     }
 
+    @Transactional(readOnly = true)
     public EmployeeDTO getEmployeeById(int id) {
         Employee employee = employeeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Employee with id: " + id + " not found!"));
         return modelMapper.map(employee, new TypeToken<EmployeeDTO>(){}.getType());
