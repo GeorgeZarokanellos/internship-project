@@ -25,18 +25,35 @@ public class BonusService {
     private final ModelMapper modelMapper;
     private final EmployeeRepository employeeRepository;
 
+    /**
+     * Constructor for BonusService.
+     *
+     * @param bonusRepository Repository for bonuses.
+     * @param employeeRepository Repository for employees.
+     * @param modelMapper Model mapper for converting between DTOs and entities.
+     */
     @Autowired
     public BonusService(BonusRepository bonusRepository, EmployeeRepository employeeRepository , ModelMapper modelMapper){
         this.bonusRepository = bonusRepository;
         this.employeeRepository = employeeRepository;
         this.modelMapper = modelMapper;
     }
+
+    /**
+     * Get all bonuses
+     * @return List<BonusDTO>
+     */
     @Transactional(readOnly = true)
     public List<BonusDTO> getBonuses(){
         List<Bonus> bonusList = bonusRepository.findAll();
         return modelMapper.map(bonusList, new TypeToken<List<BonusDTO>>(){}.getType());
     }
 
+    /**
+     * Get bonus by id
+     * @param id Bonus id
+     * @return BonusDTO
+     */
     @Transactional(readOnly = true)
     public BonusDTO getBonusById(int id){
         Bonus bonus = bonusRepository.findById(id)
@@ -44,6 +61,11 @@ public class BonusService {
         return modelMapper.map(bonus, new TypeToken<BonusDTO>(){}.getType());
     }
 
+    /**
+     * Create bonus
+     * @param bonusDTO BonusDTO
+     * @return BonusDTO
+     */
     public BonusDTO createBonus(BonusDTO bonusDTO){
 
         Bonus bonus = new Bonus();
@@ -60,17 +82,34 @@ public class BonusService {
         return bonusDTO;
     }
 
+    /**
+     * Update bonus
+     * @param bonusDTO
+     * @param id
+     * @return BonusDTO
+     */
     public BonusDTO updateBonus(BonusDTO bonusDTO, int id){
         bonusDTO.setId(id);
         bonusRepository.save(modelMapper.map(bonusDTO, Bonus.class));
         return bonusDTO;
     }
 
+    /**
+     * Delete bonus
+     * @param id
+     * @return boolean
+     */
     public boolean deleteBonus(int id){
         bonusRepository.deleteById(id);
         return true;
     }
 
+    /**
+     * Calculate bonus
+     * @param salary
+     * @param season season to apply modifier
+     * @return double
+     */
     public double calcBonus(double salary, String season){
         if(!BonusRateEnum.resolveEnum(season))
             throw new IllegalArgumentException("Invalid season: " + season + " from calcBonus!");
