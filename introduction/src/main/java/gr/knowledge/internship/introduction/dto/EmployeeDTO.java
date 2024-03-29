@@ -1,13 +1,11 @@
 package gr.knowledge.internship.introduction.dto;
 
-import gr.knowledge.internship.introduction.entity.Company;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmployeeDTO {
